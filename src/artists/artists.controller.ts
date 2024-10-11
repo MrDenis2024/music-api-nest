@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -17,6 +18,7 @@ import { CreateArtistDto } from './create-artist.dto';
 import { diskStorage } from 'multer';
 import { join, extname } from 'path';
 import { promises as fs } from 'fs';
+import { randomUUID } from 'crypto';
 
 @Controller('artists')
 export class ArtistsController {
@@ -47,7 +49,7 @@ export class ArtistsController {
         },
         filename: (req, file, cb) => {
           const extension = extname(file.originalname);
-          const newFilename = `${Date.now()}-${Math.round(Math.random() * 1e9)}${extension}`;
+          const newFilename = randomUUID() + extension;
           cb(null, newFilename);
         },
       }),
@@ -57,11 +59,15 @@ export class ArtistsController {
     @Body() artistData: CreateArtistDto,
     @UploadedFile() file: Express.Multer.File,
   ) {
-    return await this.artistModel.create({
-      name: artistData.name,
-      information: artistData.information ? artistData.information : null,
-      image: file ? 'images/artists/' + file.filename : null,
-    });
+    try {
+      return await this.artistModel.create({
+        name: artistData.name,
+        information: artistData.information ? artistData.information : null,
+        image: file ? 'images/artists/' + file.filename : null,
+      });
+    } catch (e) {
+      throw new BadRequestException(e.message);
+    }
   }
   @Delete(':id')
   async delete(@Param('id') id: string) {
