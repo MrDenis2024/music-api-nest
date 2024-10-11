@@ -3,7 +3,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ArtistsController } from './artists/artists.controller';
 import { AlbumsController } from './albums/albums.controller';
-import { TrakcsController } from './trakcs/trakcs.controller';
+import { TracksController } from './trakcs/tracks.controller';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Artist, ArtistSchema } from './schemas/artist.schema';
 import { Album, AlbumSchema } from './schemas/album.schema';
@@ -22,7 +22,7 @@ import { Track, TrackSchema } from './schemas/track.schema';
     AppController,
     ArtistsController,
     AlbumsController,
-    TrakcsController,
+    TracksController,
   ],
   providers: [AppService],
 })
