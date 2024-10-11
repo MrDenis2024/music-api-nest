@@ -1,15 +1,26 @@
 import {
+  BadRequestException,
+  Body,
   Controller,
   Delete,
   Get,
   NotFoundException,
   Param,
+  Post,
   Query,
+  UploadedFile,
+  UseInterceptors,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Album, AlbumDocument } from '../schemas/album.schema';
 import { Model } from 'mongoose';
 import { Artist, ArtistDocument } from '../schemas/artist.schema';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+import { extname, join } from 'path';
+import { promises as fs } from 'fs';
+import { randomUUID } from 'crypto';
+import { CreateAlbumDto } from './create-album.dto';
 
 @Controller('albums')
 export class AlbumsController {
@@ -32,6 +43,42 @@ export class AlbumsController {
       throw new NotFoundException(`Album not found`);
     }
     return album;
+  }
+  @Post()
+  @UseInterceptors(
+    FileInterceptor('image', {
+      storage: diskStorage({
+        destination: async (req, file, cb) => {
+          const destDir = join('./public/images', 'albums');
+          await fs.mkdir(destDir, { recursive: true });
+          cb(null, destDir);
+        },
+        filename: (req, file, cb) => {
+          const extension = extname(file.originalname);
+          const newFilename = randomUUID() + extension;
+          cb(null, newFilename);
+        },
+      }),
+    }),
+  )
+  async create(
+    @Body() albumData: CreateAlbumDto,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
+    const artist = await this.artistModel.findOne({ _id: albumData.artist });
+    if (!artist) {
+      throw new BadRequestException(`Artist does not exist`);
+    }
+    try {
+      return await this.albumModel.create({
+        artist: albumData.artist,
+        title: albumData.title,
+        year: albumData.year,
+        image: file ? 'images/albums/' + file.filename : null,
+      });
+    } catch (e) {
+      throw new BadRequestException(e.message);
+    }
   }
   @Delete(':id')
   async delete(@Param('id') id: string) {
