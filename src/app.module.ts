@@ -12,6 +12,7 @@ import { UsersController } from './users/users.controller';
 import { User, UserSchema } from './schemas/user.schema';
 import { AuthService } from './auth/auth.service';
 import { LocalStrategy } from './auth/local.strategy';
+import { UniqueUserEmailConstraint } from './users/validators/unique-user-email.validator';
 
 @Module({
   imports: [
@@ -30,6 +31,11 @@ import { LocalStrategy } from './auth/local.strategy';
     TracksController,
     UsersController,
   ],
-  providers: [AppService, AuthService, LocalStrategy],
+  providers: [
+    AppService,
+    AuthService,
+    LocalStrategy,
+    UniqueUserEmailConstraint,
+  ],
 })
 export class AppModule {}
