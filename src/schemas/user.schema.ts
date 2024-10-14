@@ -7,7 +7,7 @@ const SALT_WORK_FACTOR = 10;
 
 export interface UserMethods {
   generateToken: () => void;
-  checkPassword: (password: string) => Promise<void>;
+  checkPassword: (password: string) => Promise<boolean>;
 }
 
 export type UserDocument = User & Document & UserMethods;
