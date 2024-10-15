@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -23,6 +22,7 @@ import { promises as fs } from 'fs';
 import { randomUUID } from 'crypto';
 import { CreateAlbumDto } from './create-album.dto';
 import { TokenAuthGuard } from '../auth/token-auth.guard';
+import { RoleGuard } from '../auth/role.guard';
 
 @Controller('albums')
 export class AlbumsController {
@@ -79,6 +79,7 @@ export class AlbumsController {
     });
   }
 
+  @UseGuards(TokenAuthGuard, new RoleGuard(['admin']))
   @Delete(':id')
   async delete(@Param('id') id: string) {
     const album = await this.albumModel.findOne({ _id: id });

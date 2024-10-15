@@ -20,6 +20,7 @@ import { join, extname } from 'path';
 import { promises as fs } from 'fs';
 import { randomUUID } from 'crypto';
 import { TokenAuthGuard } from '../auth/token-auth.guard';
+import { RoleGuard } from '../auth/role.guard';
 
 @Controller('artists')
 export class ArtistsController {
@@ -71,6 +72,7 @@ export class ArtistsController {
     });
   }
 
+  @UseGuards(TokenAuthGuard, new RoleGuard(['admin']))
   @Delete(':id')
   async delete(@Param('id') id: string) {
     const artist = await this.artistModel.findOne({ _id: id });
