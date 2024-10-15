@@ -59,15 +59,11 @@ export class ArtistsController {
     @Body() artistData: CreateArtistDto,
     @UploadedFile() file: Express.Multer.File,
   ) {
-    try {
-      return await this.artistModel.create({
-        name: artistData.name,
-        information: artistData.information ? artistData.information : null,
-        image: file ? 'images/artists/' + file.filename : null,
-      });
-    } catch (e) {
-      throw new BadRequestException(e.message);
-    }
+    return await this.artistModel.create({
+      name: artistData.name,
+      information: artistData.information ? artistData.information : null,
+      image: file ? 'images/artists/' + file.filename : null,
+    });
   }
   @Delete(':id')
   async delete(@Param('id') id: string) {

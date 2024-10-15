@@ -65,20 +65,12 @@ export class AlbumsController {
     @Body() albumData: CreateAlbumDto,
     @UploadedFile() file: Express.Multer.File,
   ) {
-    const artist = await this.artistModel.findOne({ _id: albumData.artist });
-    if (!artist) {
-      throw new BadRequestException(`Artist does not exist`);
-    }
-    try {
-      return await this.albumModel.create({
-        artist: albumData.artist,
-        title: albumData.title,
-        year: albumData.year,
-        image: file ? 'images/albums/' + file.filename : null,
-      });
-    } catch (e) {
-      throw new BadRequestException(e.message);
-    }
+    return await this.albumModel.create({
+      artist: albumData.artist,
+      title: albumData.title,
+      year: albumData.year,
+      image: file ? 'images/albums/' + file.filename : null,
+    });
   }
   @Delete(':id')
   async delete(@Param('id') id: string) {

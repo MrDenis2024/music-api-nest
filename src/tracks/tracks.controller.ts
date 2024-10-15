@@ -31,20 +31,12 @@ export class TracksController {
   }
   @Post()
   async create(@Body() trackData: CreateTrackDto) {
-    const album = await this.albumModel.findOne({ _id: trackData.album });
-    if (!album) {
-      throw new NotFoundException(`Album does not exist`);
-    }
-    try {
-      return await this.trackModel.create({
-        album: trackData.album,
-        name: trackData.name,
-        duration: trackData.duration,
-        number: trackData.number,
-      });
-    } catch (e) {
-      throw new BadRequestException(e.message);
-    }
+    return await this.trackModel.create({
+      album: trackData.album,
+      name: trackData.name,
+      duration: trackData.duration,
+      number: trackData.number,
+    });
   }
   @Delete(':id')
   async delete(@Param('id') id: string) {
