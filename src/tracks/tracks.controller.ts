@@ -8,12 +8,14 @@ import {
   Param,
   Post,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Track, TrackDocument } from '../schemas/track.schema';
 import { Model } from 'mongoose';
 import { Album, AlbumDocument } from '../schemas/album.schema';
 import { CreateTrackDto } from './create-track.dto';
+import { TokenAuthGuard } from '../auth/token-auth.guard';
 
 @Controller('tracks')
 export class TracksController {
@@ -23,12 +25,15 @@ export class TracksController {
     @InjectModel(Album.name)
     private albumModel: Model<AlbumDocument>,
   ) {}
+
   @Get()
   async getAll(@Query('album') album: string) {
     return this.trackModel
       .find(album ? { album: album } : {})
       .sort({ number: 1 });
   }
+
+  @UseGuards(TokenAuthGuard)
   @Post()
   async create(@Body() trackData: CreateTrackDto) {
     return await this.trackModel.create({
@@ -38,6 +43,7 @@ export class TracksController {
       number: trackData.number,
     });
   }
+
   @Delete(':id')
   async delete(@Param('id') id: string) {
     const track = await this.trackModel.findOne({ _id: id });

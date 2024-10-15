@@ -9,6 +9,7 @@ import {
   Post,
   Query,
   UploadedFile,
+  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
@@ -21,6 +22,7 @@ import { extname, join } from 'path';
 import { promises as fs } from 'fs';
 import { randomUUID } from 'crypto';
 import { CreateAlbumDto } from './create-album.dto';
+import { TokenAuthGuard } from '../auth/token-auth.guard';
 
 @Controller('albums')
 export class AlbumsController {
@@ -30,12 +32,14 @@ export class AlbumsController {
     @InjectModel(Artist.name)
     private artistModel: Model<ArtistDocument>,
   ) {}
+
   @Get()
   async getAll(@Query('artist') artist: string) {
     return this.albumModel
       .find(artist ? { artist: artist } : {})
       .sort({ year: -1 });
   }
+
   @Get(':id')
   async getOne(@Param('id') id: string) {
     const album = await this.albumModel.findOne({ _id: id });
@@ -44,6 +48,8 @@ export class AlbumsController {
     }
     return album;
   }
+
+  @UseGuards(TokenAuthGuard)
   @Post()
   @UseInterceptors(
     FileInterceptor('image', {
@@ -72,6 +78,7 @@ export class AlbumsController {
       image: file ? 'images/albums/' + file.filename : null,
     });
   }
+
   @Delete(':id')
   async delete(@Param('id') id: string) {
     const album = await this.albumModel.findOne({ _id: id });

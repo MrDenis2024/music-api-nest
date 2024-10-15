@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -8,6 +7,7 @@ import {
   Param,
   Post,
   UploadedFile,
+  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
@@ -19,6 +19,7 @@ import { diskStorage } from 'multer';
 import { join, extname } from 'path';
 import { promises as fs } from 'fs';
 import { randomUUID } from 'crypto';
+import { TokenAuthGuard } from '../auth/token-auth.guard';
 
 @Controller('artists')
 export class ArtistsController {
@@ -26,10 +27,12 @@ export class ArtistsController {
     @InjectModel(Artist.name)
     private artistModel: Model<ArtistDocument>,
   ) {}
+
   @Get()
   async getAll() {
     return this.artistModel.find();
   }
+
   @Get(':id')
   async getOne(@Param('id') id: string) {
     const artist = await this.artistModel.findOne({ _id: id });
@@ -38,6 +41,8 @@ export class ArtistsController {
     }
     return artist;
   }
+
+  @UseGuards(TokenAuthGuard)
   @Post()
   @UseInterceptors(
     FileInterceptor('image', {
@@ -65,6 +70,7 @@ export class ArtistsController {
       image: file ? 'images/artists/' + file.filename : null,
     });
   }
+
   @Delete(':id')
   async delete(@Param('id') id: string) {
     const artist = await this.artistModel.findOne({ _id: id });
